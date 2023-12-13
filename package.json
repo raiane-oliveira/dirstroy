@@ -21,6 +21,6 @@
     "commander": "^11.1.0"
   },
   "bin": {
-    "dirstructor": "./bin/index.js"
+    "dirstroy": "./bin/index.js"
   }
 }
