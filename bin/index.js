@@ -44,6 +44,8 @@ if (!options.recursive) {
   }
 }
 
+let totalDirsDeleted = 0
+
 try {
   const dir = await fs.readdir(rootPathStartDeletions, { recursive: true })
 
@@ -55,6 +57,7 @@ try {
 
       await fs.rm(dirPath, { recursive: true, force })
       process.stdout.write(`✅\n`)
+      totalDirsDeleted += 1
     }
   }
 } catch (err) {
@@ -65,4 +68,5 @@ try {
   process.exit(1)
 }
 
+console.log(`\nTotal amount of deleted directories: ${totalDirsDeleted}`)
 process.exit(0)
