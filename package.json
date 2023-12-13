@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "bin/index.js",
-  
+  "type": "module",
   "scripts": {
     "dev": "tsx src/index.ts",
     "test": "vitest run",

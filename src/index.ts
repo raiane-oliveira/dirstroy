@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import fs from 'node:fs'
+import fs from 'node:fs/promises'
 import path from 'node:path'
 import { Command, OptionValues } from '@commander-js/extra-typings'
 
@@ -8,6 +8,7 @@ interface Options extends OptionValues {
   name: string
   path: string
   recursive: boolean
+  force: boolean
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -25,9 +26,10 @@ program
     'Determines if it will delete all occurrences of your folder or not.',
     false,
   )
+  .option('-f --force', 'Behavior similar to the `rm -rf` Unix command.', false)
   .parse()
 
-const options = program.opts()
+const { force, ...options } = program.opts()
 
 const dirNameWillBeDeleted = options.name
 const rootPathStartDeletions = options.path
@@ -36,29 +38,38 @@ if (!options.recursive) {
   const dirPath = path.join(rootPathStartDeletions, dirNameWillBeDeleted)
   try {
     process.stdout.write(`Deleting ${dirPath}...`)
-    fs.rmdirSync(dirPath)
+    await fs.rm(dirPath, { recursive: true, force })
     process.stdout.write(`✅\n`)
-  } catch {
-    console.log(`❌ The directory '${dirNameWillBeDeleted}' doesn't exists.`)
+
+    process.exit(0)
+  } catch (err) {
+    console.log(
+      `❌ Ocorreu um erro ao deletar a pasta ${dirNameWillBeDeleted} de ${rootPathStartDeletions}.\n`,
+    )
+    console.error('❗ Mais detalhes: \n', err)
     process.exit(1)
   }
-  process.exit(0)
 }
 
-fs.readdirSync(rootPathStartDeletions, {
-  recursive: true,
-}).forEach((fileName) => {
-  const dirPath = path.join(rootPathStartDeletions, fileName.toString())
+try {
+  const dir = await fs.readdir(rootPathStartDeletions, { recursive: true })
 
-  if (dirPath.includes(dirNameWillBeDeleted)) {
-    process.stdout.write(`Deleting ${dirPath}...`)
+  for await (const dirent of dir) {
+    const dirPath = path.join(rootPathStartDeletions, dirent)
 
-    fs.rm(dirPath, { recursive: true }, (err) => {
-      if (err) {
-        console.error(err)
-        process.exit(1)
-      }
-    })
-    process.stdout.write(`✅\n`)
+    if (dirPath.includes(dirNameWillBeDeleted)) {
+      process.stdout.write(`Deleting ${dirPath}...`)
+
+      await fs.rm(dirPath, { recursive: true, force })
+      process.stdout.write(`✅\n`)
+    }
   }
-})
+} catch (err) {
+  console.log(
+    `❌ Ocorreu um erro ao deletar as pastas ${dirNameWillBeDeleted} de ${rootPathStartDeletions}.\n`,
+  )
+  console.error('❗ Mais detalhes: \n', err)
+  process.exit(1)
+}
+
+process.exit(0)
