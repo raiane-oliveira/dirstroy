@@ -62,7 +62,7 @@ try {
     `❌ Ocorreu um erro ao deletar as pastas ${dirNameWillBeDeleted} de ${rootPathStartDeletions}.\n`,
   )
   console.error('❗ Mais detalhes: \n', err)
-  process.exit(1)
+  // process.exit(1)
 }
 
 process.exit(0)
