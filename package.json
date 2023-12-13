@@ -5,31 +5,19 @@
   "main": "bin/index.js",
   "type": "module",
   "scripts": {
-    "dev": "tsx src/index.ts",
-    "test": "vitest run",
-    "build": "tsup src --out-dir bin",
-    "test:watch": "vitest",
-    "test:ui": "vitest run --ui",
-    "test:coverage": "vitest run --coverage",
-    "lint": "eslint src --ext .ts",
-    "lint:fix": "eslint src --ext .ts --fix"
+    "lint": "eslint bin --ext .ts",
+    "lint:fix": "eslint bin --ext .ts --fix"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@rocketseat/eslint-config": "^2.1.0",
-    "@types/node": "^20.10.4",
-    "@vitest/coverage-v8": "^1.0.4",
-    "@vitest/ui": "^1.0.4",
     "eslint": "^8.55.0",
-    "tsx": "^4.6.2",
-    "typescript": "^5.3.3",
     "vite-tsconfig-paths": "^4.2.2",
     "vitest": "^1.0.4"
   },
   "dependencies": {
-    "@commander-js/extra-typings": "^11.1.0",
     "commander": "^11.1.0"
   },
   "bin": {

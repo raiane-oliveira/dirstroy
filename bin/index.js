@@ -2,17 +2,10 @@
 
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { Command, OptionValues } from '@commander-js/extra-typings'
-
-interface Options extends OptionValues {
-  name: string
-  path: string
-  recursive: boolean
-  force: boolean
-}
+import { Command } from 'commander'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const program = new Command<any[], Options>()
+const program = new Command()
 
 program
   .usage('Usage: -n <name> -p <path>')
