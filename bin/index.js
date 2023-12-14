@@ -31,46 +31,37 @@ const dirNameWillBeDeletedRegex = new RegExp(
 )
 const rootPathStartDeletions = options.path
 
+// Delete first occurrence of dirname input
 if (!options.recursive) {
   const dirPath = path.join(rootPathStartDeletions, dirNameWillBeDeleted)
-  try {
-    process.stdout.write(`Deleting ${dirPath}...`)
-    await fs.rm(dirPath, { recursive: true, force })
-    process.stdout.write(`✅\n`)
-
-    process.exit(0)
-  } catch (err) {
-    console.log(
-      `❌ An error occurred while deleting the '${dirNameWillBeDeleted}' folder in '${rootPathStartDeletions}'.\n`,
-    )
-    console.error('❗ More details: \n', err)
-    process.exit(1)
-  }
+  await deleteDir(dirPath, { force })
 }
 
 let totalDirsDeleted = 0
+const dir = await fs.readdir(rootPathStartDeletions, { recursive: true })
 
-try {
-  const dir = await fs.readdir(rootPathStartDeletions, { recursive: true })
+for await (const dirent of dir) {
+  const dirPath = path.join(rootPathStartDeletions, dirent)
 
-  for await (const dirent of dir) {
-    const dirPath = path.join(rootPathStartDeletions, dirent)
-
-    if (dirPath.match(dirNameWillBeDeletedRegex)) {
-      process.stdout.write(`Deleting ${dirPath}...`)
-
-      await fs.rm(dirPath, { recursive: true, force })
-      process.stdout.write(`✅\n`)
-      totalDirsDeleted += 1
-    }
+  if (dirPath.match(dirNameWillBeDeletedRegex)) {
+    await deleteDir(dirPath, { force })
+    totalDirsDeleted += 1
   }
-} catch (err) {
-  console.log(
-    `❌ An error occurred while deleting the '${dirNameWillBeDeleted}' folder in '${rootPathStartDeletions}'.\n`,
-  )
-  console.error('❗ More details: \n', err)
-  process.exit(1)
 }
 
-console.log(`\nTotal amount of deleted directories: ${totalDirsDeleted}`)
+console.log(`\nTotal deleted directories: ${totalDirsDeleted}`)
 process.exit(0)
+
+async function deleteDir(dirPath, options) {
+  try {
+    process.stdout.write(`Deleting ${dirPath}...`)
+    await fs.rm(dirPath, { recursive: true, ...options })
+    process.stdout.write(`✅\n`)
+  } catch (err) {
+    console.log(
+      `❌\n\n❗ An error occurred while deleting the '${dirNameWillBeDeleted}' folder in '${rootPathStartDeletions}' path.\n`,
+    )
+    console.error('> ⚠️ More details: \n', err)
+    process.exit(1)
+  }
+}
