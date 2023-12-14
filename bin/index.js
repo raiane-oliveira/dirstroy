@@ -25,6 +25,10 @@ program
 const { force, ...options } = program.opts()
 
 const dirNameWillBeDeleted = options.name
+const dirNameWillBeDeletedRegex = new RegExp(
+  `\\b${dirNameWillBeDeleted}\\b`,
+  'gm',
+)
 const rootPathStartDeletions = options.path
 
 if (!options.recursive) {
@@ -37,9 +41,9 @@ if (!options.recursive) {
     process.exit(0)
   } catch (err) {
     console.log(
-      `❌ Ocorreu um erro ao deletar a pasta ${dirNameWillBeDeleted} de ${rootPathStartDeletions}.\n`,
+      `❌ An error occurred while deleting the '${dirNameWillBeDeleted}' folder in '${rootPathStartDeletions}'.\n`,
     )
-    console.error('❗ Mais detalhes: \n', err)
+    console.error('❗ More details: \n', err)
     process.exit(1)
   }
 }
@@ -52,7 +56,7 @@ try {
   for await (const dirent of dir) {
     const dirPath = path.join(rootPathStartDeletions, dirent)
 
-    if (dirPath.includes(dirNameWillBeDeleted)) {
+    if (dirPath.match(dirNameWillBeDeletedRegex)) {
       process.stdout.write(`Deleting ${dirPath}...`)
 
       await fs.rm(dirPath, { recursive: true, force })
@@ -62,9 +66,9 @@ try {
   }
 } catch (err) {
   console.log(
-    `❌ Ocorreu um erro ao deletar as pastas ${dirNameWillBeDeleted} de ${rootPathStartDeletions}.\n`,
+    `❌ An error occurred while deleting the '${dirNameWillBeDeleted}' folder in '${rootPathStartDeletions}'.\n`,
   )
-  console.error('❗ Mais detalhes: \n', err)
+  console.error('❗ More details: \n', err)
   process.exit(1)
 }
 
