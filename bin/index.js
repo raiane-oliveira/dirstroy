@@ -35,6 +35,7 @@ const rootPathStartDeletions = options.path
 if (!options.recursive) {
   const dirPath = path.join(rootPathStartDeletions, dirNameWillBeDeleted)
   await deleteDir(dirPath, { force })
+  process.exit(0)
 }
 
 let totalDirsDeleted = 0
