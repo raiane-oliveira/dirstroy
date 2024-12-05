@@ -25,10 +25,6 @@ program
 const { force, ...options } = program.opts()
 
 const dirNameWillBeDeleted = options.name
-const dirNameWillBeDeletedRegex = new RegExp(
-  `\\b${dirNameWillBeDeleted}\\b`,
-  'gm',
-)
 const rootPathStartDeletions = options.path
 
 // Delete first occurrence of dirname input
@@ -39,12 +35,17 @@ if (!options.recursive) {
 }
 
 let totalDirsDeleted = 0
-const dir = await fs.readdir(rootPathStartDeletions, { recursive: true })
 
-for await (const dirent of dir) {
-  const dirPath = path.join(rootPathStartDeletions, dirent)
-
-  if (dirPath.match(dirNameWillBeDeletedRegex)) {
+for await (const dirent of openDirGen(rootPathStartDeletions)) {
+  const dirPathSplitted = path.join(dirent.parentPath, dirent.name).split('/')
+  const dirPathIndex = dirPathSplitted.findIndex(
+    (item) => item === dirNameWillBeDeleted,
+  )
+  const dirPath = dirPathSplitted.slice(0, dirPathIndex + 1).join('/')
+  if (
+    dirent.name === dirNameWillBeDeleted &&
+    dirPath === path.join(dirent.parentPath, dirNameWillBeDeleted)
+  ) {
     await deleteDir(dirPath, { force })
     totalDirsDeleted += 1
   }
@@ -52,6 +53,18 @@ for await (const dirent of dir) {
 
 console.log(`\nTotal deleted directories: ${totalDirsDeleted}`)
 process.exit(0)
+
+async function* openDirGen(directory) {
+  try {
+    const dir = await fs.opendir(directory, { recursive: true })
+
+    for await (const dirent of dir) {
+      yield dirent
+    }
+  } catch (err) {
+    console.log(`\n\n❗An error occurred while deleting the '${err.path}'.\n`)
+  }
+}
 
 async function deleteDir(dirPath, options) {
   try {
@@ -62,7 +75,7 @@ async function deleteDir(dirPath, options) {
     console.log(
       `❌\n\n❗ An error occurred while deleting the '${dirNameWillBeDeleted}' folder in '${rootPathStartDeletions}' path.\n`,
     )
-    console.error('> ⚠️ More details: \n', err)
+    console.error('> ! More details: \n', err)
     process.exit(1)
   }
 }
